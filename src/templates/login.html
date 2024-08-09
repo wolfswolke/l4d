@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Register</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#000000">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="theme-color" content="#ffffff">
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .form-group {
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: #fff;
+        }
+        .form-group input:focus {
+            outline: none;
+            border: 1px solid #555;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #6200ea;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #3700b3;
+        }
+        .message {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm" class="form-group">
+            <label for="loginUsername">Username</label>
+            <input type="text" id="loginUsername" name="username" required>
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" name="password" required>
+            <button type="submit" class="button">Login</button>
+        </form>
+        <div id="loginMessage" class="message"></div>
+
+        <h2>Register</h2>
+        <form id="registerForm" class="form-group">
+            <label for="registerUsername">Username</label>
+            <input type="text" id="registerUsername" name="username" required>
+            <label for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" name="password" required>
+            <button type="submit" class="button">Register</button>
+        </form>
+        <div id="registerMessage" class="message"></div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            fetch('/api/v1/user_handling/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const loginMessage = document.getElementById('loginMessage');
+                if (data.status === 'OK') {
+                    loginMessage.textContent = 'Successfully logged in';
+                    location.reload();
+                } else {
+                    loginMessage.textContent = 'Error: ' + data.message;
+                }
+            })
+            .catch(error => {
+                document.getElementById('loginMessage').textContent = 'An error occurred';
+            });
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            fetch('/api/v1/user_handling/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const registerMessage = document.getElementById('registerMessage');
+                if (data.status === 'OK') {
+                    registerMessage.textContent = 'Successfully registered';
+                    location.reload();
+                } else {
+                    registerMessage.textContent = 'Error: ' + data.message;
+                }
+            })
+            .catch(error => {
+                document.getElementById('registerMessage').textContent = 'An error occurred';
+            });
+        });
+    </script>
+</body>
+</html>

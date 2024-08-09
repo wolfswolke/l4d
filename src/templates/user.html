@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#000000">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="theme-color" content="#ffffff">
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        a {
+            color: #1e90ff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .header, .content {
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+        }
+    </style>
+<script>
+        function logout() {
+            fetch('/api/v1/user_handling/logout', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    location.reload();
+                } else {
+                    alert('Logout failed.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during logout.');
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome, {{ user_data.username }}!</h1>
+        </div>
+        <div class="content">
+            <p><strong>User ID:</strong> {{ user_data.user_id }}</p>
+            <p><strong>Token:</strong> {{ user_data.token }}</p>
+            <p><a href="/">Go to Page</a></p>
+        </div>
+        <div class="footer">
+            <p>Use this token to upload AES keys under /api/v1/aes/GameNameHere</p>
+            <button class="button" onclick="logout()">Logout</button>
+        </div>
+    </div>
+</body>
+</html></title>
+</head>
+<body>
+
+</body>
+</html>
