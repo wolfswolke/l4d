@@ -1,0 +1,5 @@
+.idea
+src/test/
+src/config/api_config.yaml
+*.pyc
+/src/app/tmp
