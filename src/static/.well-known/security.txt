@@ -1,0 +1,4 @@
+Contact: mailto:zkwolf@zkwolf.com
+Expires: 2025-12-31T23:00:00.000Z
+Preferred-Languages: en, de
+Canonical: https://l4d.zkwolf.com/.well-known/security.txt
