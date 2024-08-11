@@ -54,4 +54,6 @@ if dev_env == "true":
     mongo.setup(mongo_host, mongo_db_dev, mongo_collection)
 else:
     mongo.setup(mongo_host, mongo_db, mongo_collection)
+# todo Add some db stuff here...
+firehose_generator.setup("00000000-0000-0000-0000-000000000000")
 keep_alive()

@@ -7,6 +7,7 @@ from logic.setup_handler import load_config
 # from logic.encoding_handler import
 from logic.general_handler import session_manager
 from logic.general_handler import _get_remote_ip
+from logic.aws_handler import firehose_generator
 
 import json
 import os

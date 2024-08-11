@@ -1,3 +1,4 @@
+from flask_definitions import *
 # REQ:
 # {
 #   "body": [
@@ -45,3 +46,29 @@
 #         }
 #     ]
 # }
+
+temp_records = []
+
+
+@app.route('/api/v1/aws/<index>/batch', methods=['POST'])
+def aws_batch(index):
+    try:
+        resp = {
+            "FailedPutCount": 0,
+            "RequestResponses": []
+        }
+        data = request.json['body']
+        for item in data:
+            record_id = firehose_generator.generate()
+            resp['RequestResponses'].append({"RecordId": record_id})
+            logger.log(level="info", handler="aws", content=f"index: {index} data: {item}, record_id: {record_id}")
+            temp_records.append({"index": index, "data": item, "record_id": record_id})
+        return jsonify(resp)
+    except Exception as e:
+        logger.log_exception(e)
+        return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+
+
+@app.route('/temp/firehose', methods=['GET'])
+def firehose():
+    return jsonify(temp_records)

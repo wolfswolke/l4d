@@ -4,6 +4,8 @@ import io
 from flask_definitions import *
 import re
 
+from logic.date_handler import get_current_date
+
 # respond_with_empty_img
 # Responds with an empty GIF image of 1x1 pixel (rather than an empty string).
 
@@ -21,6 +23,7 @@ import re
 # application/msgpack       MessagePack     -
 # application/x-ndjson      NDJSON          1.14.5
 
+temp_logs = []
 
 def sanitize_log_message(message_bytes):
     """
@@ -92,6 +95,11 @@ def fluentd_empty(index):
         data = request.data
         cleaned_str = sanitize_log_message(data)
         logger.log(level="info", handler="fluentd", content=f"index: {index} data: {json.loads(cleaned_str)}")
+        log_obj = {"index": index,
+                   "time": get_current_date(),
+                   "data": json.loads(cleaned_str),
+                   "response": "empty"}
+        temp_logs.append(log_obj)
         return "", 204
     except Exception as e:
         logger.log_exception(e)
@@ -105,7 +113,17 @@ def fluentd_gif(index):
         data = request.data
         cleaned_str = sanitize_log_message(data)
         logger.log(level="info", handler="fluentd", content=f"index: {index} data: {json.loads(cleaned_str)}")
+        log_obj = {"index": index,
+                   "time": get_current_date(),
+                   "data": json.loads(cleaned_str),
+                   "response": "gif"}
+        temp_logs.append(log_obj)
         return respond_with_empty_img()
     except Exception as e:
         logger.log_exception(e)
         return jsonify({"status": "error", "message": "Internal Server Error"}), 500
+
+
+@app.route('/temp/fluentd', methods=['GET'])
+def temp_logview():
+    return jsonify(temp_logs)
