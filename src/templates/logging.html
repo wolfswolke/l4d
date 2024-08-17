@@ -3,6 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>L4D Logging</title>
+    <script>
+        // Function to create tables dynamically
+        function createTables(logs) {
+            const container = document.getElementById('logTablesContainer');
+            container.innerHTML = ''; // Clear existing tables
+
+            for (const logType in logs) {
+                const logEntries = logs[logType];
+
+                // If the log entry is an empty list, skip it
+                if (logEntries.length === 0) {
+                    continue;
+                }
+
+                logEntries.forEach((logEntry, index) => {
+                    const table = document.createElement('table');
+                    table.border = '1';
+
+                    const caption = document.createElement('caption');
+                    caption.innerText = `${logType} - Entry ${index + 1}`;
+                    table.appendChild(caption);
+
+                    for (const key in logEntry) {
+                        const row = document.createElement('tr');
+
+                        const keyCell = document.createElement('td');
+                        keyCell.innerText = key;
+                        row.appendChild(keyCell);
+
+                        const valueCell = document.createElement('td');
+                        valueCell.innerText = JSON.stringify(logEntry[key], null, 2); // Convert values to string
+                        row.appendChild(valueCell);
+
+                        table.appendChild(row);
+                    }
+
+                    container.appendChild(table);
+                });
+            }
+        }
+
+        // fetch logs and refresh the tables
+        function refreshLogs() {
+            fetch('/api/v1/get_logs')
+                .then(response => response.json())
+                .then(data => {
+                    createTables(data);
+                })
+                .catch(error => console.error('Error fetching logs:', error));
+        }
+
+        // Call refreshLogs on page load
+        window.onload = refreshLogs;
+    </script>
 </head>
 <body>
 <h1>Logging</h1>
@@ -10,6 +64,9 @@
 <a href="/temp/firehose">TEMP Firehose Logs</a>
 <br>
 <a href="/temp/fluentd">TEMP FluentD Logs</a>
+<br><br>
+<button onclick="refreshLogs()">Refresh Logs</button>
+<div id="logTablesContainer"></div>
 
 </body>
 </html>

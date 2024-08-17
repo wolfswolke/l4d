@@ -39,6 +39,36 @@ def sanitize_log_message(message_bytes):
     # Escape or remove any potentially dangerous characters
     safe_message = re.sub(r'[^\x20-\x7E]', '', message)  # Removes non-printable ASCII characters
 
+    # Remove h3 colon and semicolon
+    pattern = r'(alt-svc:\s*h3="[^"]*?)\s*";'
+    safe_message = re.sub(pattern, r'\1";', safe_message)
+
+    # Remove Response Header with URLS
+    safe_message = safe_message.replace('{"endpoints":[{"url":"', "")
+    safe_message = safe_message.replace('"}],"group":"cf-nel","max_age":604800}', "")
+    safe_message = safe_message.replace('NEL: {"success_fraction":0,"report_to":"cf-nel","max_age":604800}', "")
+    pattern = r'"log": ".*? Response Header.*?"\n?'
+    safe_message = re.sub(pattern, '', safe_message, flags=re.DOTALL)
+    pattern = re.compile(r'"log": "(?:[^\\"]|\\\\|\\")*[^}]*[^"]*"[A-Za-z0-9]+":"[^"]*","[^"]*"[^"]*"', re.IGNORECASE)
+    # Like AAAAAAA how tf?????
+    # How can a string be this fucked up?!?!?!?!
+    # Problematic section of the string: 'Header alt-svc: h3=":443"; ma=86400"}]'
+    safe_message = pattern.sub('', safe_message)
+    try:
+        dat = json.loads(safe_message)
+        print(dat)
+        print("No error")
+    except json.JSONDecodeError as e:
+        error_position = e.pos
+        start = max(0, error_position - 20)
+        end = min(len(safe_message), error_position + 20)
+        snippet = safe_message[start:end]
+        print(f"JSONDecodeError: {e}")
+        print(f"Problematic section of the string: '{snippet}'")
+
+    except Exception as e:
+        print(e)
+
     return safe_message
 
 
@@ -99,7 +129,7 @@ def fluentd_empty(index):
                    "time": get_current_date(),
                    "data": json.loads(cleaned_str),
                    "response": "empty"}
-        temp_logs.append(log_obj)
+        mongo.add_log("fluent", log_obj)
         return "", 204
     except Exception as e:
         logger.log_exception(e)
@@ -117,7 +147,7 @@ def fluentd_gif(index):
                    "time": get_current_date(),
                    "data": json.loads(cleaned_str),
                    "response": "gif"}
-        temp_logs.append(log_obj)
+        mongo.add_log("fluent", log_obj)
         return respond_with_empty_img()
     except Exception as e:
         logger.log_exception(e)

@@ -216,6 +216,7 @@ class Mongo:
                 new_log["log_id"] = log_id if log_id else str(uuid.uuid4())
                 for key, value in log_dict.items():
                     new_log[key] = value
+                new_log["log_type"] = log_type
                 dyn_collection.insert_one(new_log)
                 client.close()
                 return {"status": "success", "message": "Log added"}
@@ -229,6 +230,7 @@ class Mongo:
                 new_log["record_id"] = log_id if log_id else str(uuid.uuid4())
                 for key, value in log_dict.items():
                     new_log[key] = value
+                new_log["log_type"] = log_type
                 dyn_collection.insert_one(new_log)
                 client.close()
                 return {"status": "success", "message": "Log added"}
@@ -276,17 +278,17 @@ class Mongo:
             print(e)
             return None
 
-    def get_logs(self, log_type, user_id, limit=100):
+    def get_logs(self, log_type, limit=100):
         try:
             client = pymongo.MongoClient(self.dyn_server)
             dyn_client_db = client[self.dyn_db]
             dyn_collection = dyn_client_db[self.log_collection]
             logs = []
             if log_type == "fluent":
-                for log in dyn_collection.find({"user_id": user_id}).sort("timestamp", pymongo.DESCENDING).limit(limit):
+                for log in dyn_collection.find({"log_type": "fluent"}).sort("timestamp", pymongo.DESCENDING).limit(limit):
                     logs.append(log)
             elif log_type == "firehose":
-                for log in dyn_collection.find({"user_id": user_id}).sort("timestamp", pymongo.DESCENDING).limit(limit):
+                for log in dyn_collection.find({"log_type": "firehose"}).sort("timestamp", pymongo.DESCENDING).limit(limit):
                     logs.append(log)
             else:
                 print(f"Log type not recognized: {log_type}")
