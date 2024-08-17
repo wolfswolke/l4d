@@ -11,6 +11,7 @@ from waitress import serve
 from flask_definitions import *
 import endpoints.user
 import endpoints.general
+import endpoints.web
 
 import endpoints.platforms.aws
 import endpoints.platforms.fluent
@@ -51,9 +52,9 @@ def keep_alive():
 webhook_handler.setup(discord_urls=moderation_urls, use_discord=use_discord)
 session_manager.setup()
 if dev_env == "true":
-    mongo.setup(mongo_host, mongo_db_dev, mongo_collection)
+    mongo.setup(mongo_host, mongo_db_dev, mongo_collection, mongo_log_collection)
 else:
-    mongo.setup(mongo_host, mongo_db, mongo_collection)
+    mongo.setup(mongo_host, mongo_db, mongo_collection, mongo_log_collection)
 # todo Add some db stuff here...
 firehose_generator.setup("00000000-0000-0000-0000-000000000000")
 keep_alive()
