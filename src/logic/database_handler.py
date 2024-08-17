@@ -21,19 +21,39 @@ class Mongo:
         self.dyn_server = ""
         self.dyn_db = ""
         self.user_collection = ""
+        self.log_collection = ""
         self.user = {
             "user_id": "",
             "username": "",
             "password_hash": "",
             "token": ""
         }
+        # todo remove token
+        self.fluent_log = {
+            "log_id": "",
+            "timestamp": 0,
+            "url": "",
+            "httpCode": 0,
+            "elapsedTime": 0.0,
+            "eventType": "",
+            "extra_content": {}
+        }
+        self.firehose_log = {
+            "record_id": "",
+            "timestamp": 0,
+            "eventType": "",
+            "eventTypeVersion": 0,
+            "eventId": "",
+            "extra_content": {}
+        }
+        # todo Question yourself how to handle the extra content like log_types and log structures
 
-    # todo remove token
-
-    def setup(self, server, db, user_collection):
+    def setup(self, server, db, user_collection, mongo_log_collection):
         self.dyn_server = server
         self.dyn_db = db
         self.user_collection = user_collection
+        self.log_collection = mongo_log_collection
+
 
     def user_handling(self, username, password, register=False):
         try:
@@ -183,6 +203,100 @@ class Mongo:
         except Exception as e:
             print(e)
             return None
+
+    def add_log(self, log_type, log_dict, log_id=None):
+        try:
+            if log_type == "fluent":
+                client = pymongo.MongoClient(self.dyn_server)
+                dyn_client_db = client[self.dyn_db]
+                dyn_collection = dyn_client_db[self.log_collection]
+                new_log = {}
+                for key, default_value in self.fluent_log.items():
+                    new_log[key] = default_value
+                new_log["log_id"] = log_id if log_id else str(uuid.uuid4())
+                for key, value in log_dict.items():
+                    new_log[key] = value
+                dyn_collection.insert_one(new_log)
+                client.close()
+                return {"status": "success", "message": "Log added"}
+            elif log_type == "firehose":
+                client = pymongo.MongoClient(self.dyn_server)
+                dyn_client_db = client[self.dyn_db]
+                dyn_collection = dyn_client_db[self.log_collection]
+                new_log = {}
+                for key, default_value in self.firehose_log.items():
+                    new_log[key] = default_value
+                new_log["record_id"] = log_id if log_id else str(uuid.uuid4())
+                for key, value in log_dict.items():
+                    new_log[key] = value
+                dyn_collection.insert_one(new_log)
+                client.close()
+                return {"status": "success", "message": "Log added"}
+            else:
+                print(f"Log type not recognized: {log_type}")
+                return None
+        except Exception as e:
+            print(e)
+            return None
+
+    def add_batch(self, log_type, log_dicts):
+        try:
+            if log_type == "fluent":
+                client = pymongo.MongoClient(self.dyn_server)
+                dyn_client_db = client[self.dyn_db]
+                dyn_collection = dyn_client_db[self.log_collection]
+                for log_dict in log_dicts:
+                    new_log = {}
+                    for key, default_value in self.fluent_log.items():
+                        new_log[key] = default_value
+                    new_log["log_id"] = str(uuid.uuid4())
+                    for key, value in log_dict.items():
+                        new_log[key] = value
+                    dyn_collection.insert_one(new_log)
+                client.close()
+                return {"status": "success", "message": "Logs added"}
+            elif log_type == "firehose":
+                client = pymongo.MongoClient(self.dyn_server)
+                dyn_client_db = client[self.dyn_db]
+                dyn_collection = dyn_client_db[self.log_collection]
+                for log_dict in log_dicts:
+                    new_log = {}
+                    for key, default_value in self.firehose_log.items():
+                        new_log[key] = default_value
+                    new_log["record_id"] = str(uuid.uuid4())
+                    for key, value in log_dict.items():
+                        new_log[key] = value
+                    dyn_collection.insert_one(new_log)
+                client.close()
+                return {"status": "success", "message": "Logs added"}
+            else:
+                print(f"Log type not recognized: {log_type}")
+                return None
+        except Exception as e:
+            print(e)
+            return None
+
+    def get_logs(self, log_type, user_id, limit=100):
+        try:
+            client = pymongo.MongoClient(self.dyn_server)
+            dyn_client_db = client[self.dyn_db]
+            dyn_collection = dyn_client_db[self.log_collection]
+            logs = []
+            if log_type == "fluent":
+                for log in dyn_collection.find({"user_id": user_id}).sort("timestamp", pymongo.DESCENDING).limit(limit):
+                    logs.append(log)
+            elif log_type == "firehose":
+                for log in dyn_collection.find({"user_id": user_id}).sort("timestamp", pymongo.DESCENDING).limit(limit):
+                    logs.append(log)
+            else:
+                print(f"Log type not recognized: {log_type}")
+                return None
+            client.close()
+            return logs
+        except Exception as e:
+            print(e)
+            return None
+
 
 
 mongo = Mongo()

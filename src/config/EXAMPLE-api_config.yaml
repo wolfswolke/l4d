@@ -5,7 +5,8 @@ mongodb:
   host: mongodb://IP:27017/
   db: db_name
   db_dev: db_name_dev
-  collection: collection_name
+  user_collection: collection_name
+  log_collection: log_collection_name
 api:
   allowed_tokens:
     - token1xyz
