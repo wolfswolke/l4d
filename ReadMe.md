@@ -9,7 +9,9 @@ L4D is here to try and fix this!
 
 L4D is for 1 open source so add what you need!
 
-And we also aim for 2 main things.
+And 2 trying to implement as many known standards to make it compatible with a lot of already existing Hardware/Software.
+
+Our 2 main goals are:
 
 1. Compatibility for known logging input/output (Fluent, AWS Firehose,...)
 2. Custom input/output. This means you can add URLs with a Input schema and set how the API should response.
