@@ -116,6 +116,7 @@ class Session_Manager:
         self.sessions = {}
         self.session_file = "sessions.json"
         self.session_file_path = f"/app/tmp/{self.session_file}"
+        self.session_time = 2629800
 
     def setup(self):
         print("Setting up Session Manager")
@@ -134,7 +135,7 @@ class Session_Manager:
 
     def create_session(self, user_id):
         session_id = str(uuid.uuid4())
-        expires = time.time() + 3600
+        expires = time.time() + self.session_time
         self.sessions[session_id] = {"session_id": session_id, "expires": expires, "user": user_id}
         self.save_sessions(clean=True)
         return session_id
@@ -145,21 +146,21 @@ class Session_Manager:
             if session_id:
                 logger.log(level="info", handler="session_manager",
                                   content=f"Session ID: {session_id} not found.")
-                abort(401)
+                return None
             else:
-                abort(401)
+                return None
         self.extend_session(session_id)
         self.save_sessions()
         return self.sessions[session_id]["user"]
 
     def extend_session(self, session_id):
         try:
-            self.sessions[session_id]["expires"] = time.time() + 3600
+            self.sessions[session_id]["expires"] = time.time() + self.session_time
             self.save_sessions()
         except KeyError:
             logger.log(level="info", handler="session_manager",
                                   content=f"Session ID: {session_id} not found.")
-            abort(403)
+            return None
 
     def clean_sessions(self):
         current_time = time.time()
