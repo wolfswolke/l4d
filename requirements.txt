@@ -1,5 +1,6 @@
-PyYAML~=6.0.1
+PyYAML~=6.0.2
 requests~=2.32.3
-pymongo~=4.8.0
+pymongo~=4.10.1
 Flask~=3.0.3
-waitress~=3.0.0
+waitress~=3.0.1
+chardet~=5.2.0
