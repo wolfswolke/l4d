@@ -131,6 +131,10 @@ def fluentd_empty(index):
                    "response": "empty"}
         mongo.add_log("fluent", log_obj)
         return "", 204
+    except json.JSONDecodeError as e:
+        logger.log_exception(e)
+        # TEMP workaround for shitty JSON...
+        return jsonify(""), 204
     except Exception as e:
         logger.log_exception(e)
         return jsonify({"status": "error", "message": "Internal Server Error"}), 500
