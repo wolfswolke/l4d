@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request, send_from_directory, abort, render_te
 from logic.logging_handler import logger
 from logic.webhook_handler import webhook_handler
 from logic.database_handler import mongo
-from logic.setup_handler import load_config
 # from logic.database_handler import
 # from logic.encoding_handler import
 from logic.general_handler import session_manager
@@ -14,18 +13,17 @@ import os
 
 app = Flask(__name__)
 
-config = load_config()
-mongo_host = config['mongodb']['host']
-mongo_db = config['mongodb']['db']
-mongo_db_dev = config['mongodb']['db_dev']
-mongo_collection = config['mongodb']['user_collection']
-mongo_log_collection = config['mongodb']['log_collection']
-allowed_tokens = config['api']['allowed_tokens']
-use_discord = config['webhooks']['discord']['use_discord']
-moderation_urls = config['webhooks']['discord']['moderation_urls']
+mongo_host = os.environ['MONGODB_HOST']
+mongo_db = os.environ['MONGODB_DB']
+mongo_db_dev = os.environ['MONGODB_DB_DEV']
+mongo_collection = os.environ['MONGODB_USER_COLLECTION']
+mongo_log_collection = os.environ['MONGODB_LOG_COLLECTION']
+allowed_tokens = os.environ['API_ALLOWED_TOKENS'].split(',')
+use_discord = os.environ['WEBHOOKS_DISCORD_USE_DISCORD']
+moderation_urls = os.environ['webhooks']['discord']['moderation_urls']
 dev_env = os.environ['DEV']
-local_ip = config['general']['local_ip']
+local_ip = os.environ['GENERAL_LOCAL_IP']
 
 if isinstance(allowed_tokens, str):
-    print("The element 'allowed_tokens' should not be a string! Please Update your config!")
+    print("The element 'allowed_tokens' should not be a string! Please Update your envs!")
     exit(1)
