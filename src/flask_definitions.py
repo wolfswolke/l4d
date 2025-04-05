@@ -12,6 +12,65 @@ import json
 import os
 
 app = Flask(__name__)
+CLOUDFLARE_CSP = {
+    'default-src': "'self'",
+    'script-src': [
+        "'self'",
+        "'unsafe-inline'",
+        "*.cloudflare.com",
+        "*.cloudflareinsights.com",
+    ],
+    'style-src': [
+        "'self'",
+        "'unsafe-inline'",
+        "*.cloudflare.com",
+    ],
+    'img-src': [
+        "'self'",
+        "data:",
+        "*.cloudflare.com",
+    ],
+    'connect-src': [
+        "'self'",
+        "*.cloudflare.com",
+    ],
+    'form-action': "'self'",
+    'frame-ancestors': "'none'",
+}
+
+def compile_csp():
+    return '; '.join(
+        f"{key} {' '.join(value)}"
+        for key, value in CLOUDFLARE_CSP.items()
+    )
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
+    response.headers['Content-Security-Policy'] = compile_csp()
+    response.headers['Permissions-Policy'] = (
+        "accelerometer=(), ambient-light-sensor=(), autoplay=(), "
+        "battery=(), camera=(), display-capture=(), document-domain=(), "
+        "encrypted-media=(), execution-while-not-rendered=(), "
+        "execution-while-out-of-viewport=(), fullscreen=(), "
+        "geolocation=(), gyroscope=(), magnetometer=(), microphone=(), "
+        "midi=(), navigation-override=(), payment=(), "
+        "picture-in-picture=(), publickey-credentials-get=(), "
+        "screen-wake-lock=(), sync-xhr=(), usb=(), "
+        "web-share=(), xr-spatial-tracking=()"
+    )
+    response.headers['X-Forwarded-Proto'] = 'https'
+    return response
+
+@app.route('/csp-violation-report', methods=['POST'])
+def csp_report():
+    app.logger.warning(f"CSP violation: {request.data}")
+    return '', 204
 
 mongo_host = os.environ['MONGODB_HOST']
 mongo_db = os.environ['MONGODB_DB']
