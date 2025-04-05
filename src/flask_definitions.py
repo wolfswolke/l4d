@@ -20,7 +20,7 @@ mongo_collection = os.environ['MONGODB_USER_COLLECTION']
 mongo_log_collection = os.environ['MONGODB_LOG_COLLECTION']
 allowed_tokens = os.environ['API_ALLOWED_TOKENS'].split(',')
 use_discord = os.environ['WEBHOOKS_DISCORD_USE_DISCORD']
-moderation_urls = os.environ['webhooks']['discord']['moderation_urls']
+moderation_urls = os.environ['WEBHOOKS_DISCORD_MODERATION_URLS']
 dev_env = os.environ['DEV']
 local_ip = os.environ['GENERAL_LOCAL_IP']
 
